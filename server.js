@@ -13,27 +13,37 @@ const app = express();
 const corsOptions = {
   origin: "*",
   methods: "GET, POST, PUT, DELETE, PATCH, HEAD",
-  credential: true,
+  credentials: true,  // Corrected property name
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
 
 if (cluster.isPrimary) {
+  console.log(`Primary ${process.pid} is running`);
+
+  // Fork workers
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
+
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`Worker ${worker.process.pid} died`);
+    cluster.fork();  // Fork a new worker when one dies
+  });
 } else {
   app.use("/app", projectRouter);
   app.use("/app", aboutRouter);
   app.use("/app", techstackRouter);
   app.use("/app", contactRouter);
 
-  const PORT = 4222;
+  const PORT = 4222;  // Use environment variable for the port if available
   connectDb().then(() => {
     app.listen(PORT, () => {
-      console.log(`Listening onn port http://localhost:${PORT}`);
+      console.log(`Listening on port http://localhost:${PORT}`);
     });
+  }).catch(err => {
+    console.error('Failed to connect to the database', err);
   });
 }
 
