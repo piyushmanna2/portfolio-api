@@ -13,7 +13,7 @@ const app = express();
 const corsOptions = {
   origin: "*",
   methods: "GET, POST, PUT, DELETE, PATCH, HEAD",
-  credentials: true,  // Corrected property name
+  credentials: true,  
 };
 
 app.use(cors(corsOptions));
@@ -22,14 +22,14 @@ app.use(express.json());
 if (cluster.isPrimary) {
   console.log(`Primary ${process.pid} is running`);
 
-  // Fork workers
+
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
 
   cluster.on('exit', (worker, code, signal) => {
     console.log(`Worker ${worker.process.pid} died`);
-    cluster.fork();  // Fork a new worker when one dies
+    cluster.fork();
   });
 } else {
   app.use("/app", projectRouter);
@@ -37,7 +37,7 @@ if (cluster.isPrimary) {
   app.use("/app", techstackRouter);
   app.use("/app", contactRouter);
 
-  const PORT = 4222;  // Use environment variable for the port if available
+  const PORT = 4222; 
   connectDb().then(() => {
     app.listen(PORT, () => {
       console.log(`Listening on port http://localhost:${PORT}`);
