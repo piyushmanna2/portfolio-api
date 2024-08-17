@@ -1,4 +1,4 @@
-const createClient = require('redis');
+const redis = require('redis');
 
 const redisClient = redis.createClient({
     password: process.env.REDIS_PASSWORD,
@@ -8,10 +8,15 @@ const redisClient = redis.createClient({
     }
 });
 
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
+redisClient.on('error', (err) => console.error('Redis Client Error', err));
 
 (async () => {
-  await redisClient.connect();
+  try {
+    await redisClient.connect();
+    console.log("Connected to Redis");
+  } catch (err) {
+    console.error('Failed to connect to Redis', err);
+  }
 })();
 
 module.exports = redisClient;
